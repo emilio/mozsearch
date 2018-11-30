@@ -250,6 +250,14 @@ private:
     return stringFormat("%d-%d", Line1, Line2);
   }
 
+  std::string getPrettyName(const NamedDecl *D) {
+    std::string Backing;
+    llvm::raw_string_ostream Stream(Backing);
+    bool Qualified = true;
+    D->getNameForDiagnostic(Stream, clang::PrintingPolicy(CI.getLangOpts()), Qualified);
+    return Stream.str();
+  }
+
   // Returns the qualified name of `d` without considering template parameters.
   std::string getQualifiedName(const NamedDecl *D) {
     const DeclContext *Ctx = D->getDeclContext();
@@ -1191,7 +1199,7 @@ public:
       PrettyKind = "destructor";
     }
 
-    visitIdentifier(Kind, PrettyKind, getQualifiedName(D), Loc, Symbols,
+    visitIdentifier(Kind, PrettyKind, getPrettyName(D), Loc, Symbols,
                     getContext(D), Flags, PeekRange);
 
     return true;
@@ -1212,7 +1220,7 @@ public:
 
     // FIXME: Need to do something different for list initialization.
 
-    visitIdentifier("use", "constructor", getQualifiedName(Ctor), Loc, Mangled,
+    visitIdentifier("use", "constructor", getPrettyName(Ctor), Loc, Mangled,
                     getContext(Loc));
 
     return true;
@@ -1259,7 +1267,7 @@ public:
       return true;
     }
 
-    visitIdentifier("use", "function", getQualifiedName(NamedCallee), Loc, Mangled,
+    visitIdentifier("use", "function", getPrettyName(NamedCallee), Loc, Mangled,
                     getContext(Loc), Flags);
 
     return true;
@@ -1274,7 +1282,7 @@ public:
 
     TagDecl *Decl = L.getDecl();
     std::string Mangled = getMangledName(CurMangleContext, Decl);
-    visitIdentifier("use", "type", getQualifiedName(Decl), Loc, Mangled,
+    visitIdentifier("use", "type", getPrettyName(Decl), Loc, Mangled,
                     getContext(Loc));
     return true;
   }
@@ -1288,7 +1296,7 @@ public:
 
     NamedDecl *Decl = L.getTypedefNameDecl();
     std::string Mangled = getMangledName(CurMangleContext, Decl);
-    visitIdentifier("use", "type", getQualifiedName(Decl), Loc, Mangled,
+    visitIdentifier("use", "type", getPrettyName(Decl), Loc, Mangled,
                     getContext(Loc));
     return true;
   }
@@ -1302,7 +1310,7 @@ public:
 
     NamedDecl *Decl = L.getDecl();
     std::string Mangled = getMangledName(CurMangleContext, Decl);
-    visitIdentifier("use", "type", getQualifiedName(Decl), Loc, Mangled,
+    visitIdentifier("use", "type", getPrettyName(Decl), Loc, Mangled,
                     getContext(Loc));
     return true;
   }
@@ -1318,12 +1326,12 @@ public:
     if (ClassTemplateDecl *D = dyn_cast<ClassTemplateDecl>(Td)) {
       NamedDecl *Decl = D->getTemplatedDecl();
       std::string Mangled = getMangledName(CurMangleContext, Decl);
-      visitIdentifier("use", "type", getQualifiedName(Decl), Loc, Mangled,
+      visitIdentifier("use", "type", getPrettyName(Decl), Loc, Mangled,
                       getContext(Loc));
     } else if (TypeAliasTemplateDecl *D = dyn_cast<TypeAliasTemplateDecl>(Td)) {
       NamedDecl *Decl = D->getTemplatedDecl();
       std::string Mangled = getMangledName(CurMangleContext, Decl);
-      visitIdentifier("use", "type", getQualifiedName(Decl), Loc, Mangled,
+      visitIdentifier("use", "type", getPrettyName(Decl), Loc, Mangled,
                       getContext(Loc));
     }
 
@@ -1349,7 +1357,7 @@ public:
         Flags = NoCrossref;
       }
       std::string Mangled = getMangledName(CurMangleContext, Decl);
-      visitIdentifier("use", "variable", getQualifiedName(Decl), Loc, Mangled,
+      visitIdentifier("use", "variable", getPrettyName(Decl), Loc, Mangled,
                       getContext(Loc), Flags);
     } else if (isa<FunctionDecl>(Decl)) {
       const FunctionDecl *F = dyn_cast<FunctionDecl>(Decl);
@@ -1358,11 +1366,11 @@ public:
       }
 
       std::string Mangled = getMangledName(CurMangleContext, Decl);
-      visitIdentifier("use", "function", getQualifiedName(Decl), Loc, Mangled,
+      visitIdentifier("use", "function", getPrettyName(Decl), Loc, Mangled,
                       getContext(Loc));
     } else if (isa<EnumConstantDecl>(Decl)) {
       std::string Mangled = getMangledName(CurMangleContext, Decl);
-      visitIdentifier("use", "enum", getQualifiedName(Decl), Loc, Mangled,
+      visitIdentifier("use", "enum", getPrettyName(Decl), Loc, Mangled,
                       getContext(Loc));
     }
 
@@ -1389,7 +1397,7 @@ public:
 
       FieldDecl *Member = Ci->getMember();
       std::string Mangled = getMangledName(CurMangleContext, Member);
-      visitIdentifier("use", "field", getQualifiedName(Member), Loc, Mangled,
+      visitIdentifier("use", "field", getPrettyName(Member), Loc, Mangled,
                       getContext(D));
     }
 
@@ -1406,7 +1414,7 @@ public:
     ValueDecl *Decl = E->getMemberDecl();
     if (FieldDecl *Field = dyn_cast<FieldDecl>(Decl)) {
       std::string Mangled = getMangledName(CurMangleContext, Field);
-      visitIdentifier("use", "field", getQualifiedName(Field), Loc, Mangled,
+      visitIdentifier("use", "field", getPrettyName(Field), Loc, Mangled,
                       getContext(Loc));
     }
     return true;
