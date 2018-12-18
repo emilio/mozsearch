@@ -124,10 +124,10 @@ fn main() {
         let analysis = read_analysis(&analysis_fname, &mut read_target);
 
         let source_fname = find_source_file(path, &tree_config.paths.files_path, &tree_config.paths.objdir_path);
-        let source_file = match File::open(source_fname) {
+        let source_file = match File::open(&source_fname) {
             Ok(f) => f,
             Err(_) => {
-                println!("Unable to open source file");
+                println!("Unable to open source file {}", source_fname);
                 continue;
             },
         };
