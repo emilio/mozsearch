@@ -1,3 +1,5 @@
+#include "templates5.h"
+
 class Foo {};
 class Baz {};
 
