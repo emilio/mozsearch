@@ -26,7 +26,7 @@ analyze: build
 	@if [ ! -d objdir ]; then mkdir objdir; fi
 	@if [ ! -d analysis ]; then mkdir analysis; fi
 	-$(RM) analysis/*
-	-clang++ -c \
+	-rr clang++ -c \
 		-Xclang -load                       -Xclang ./libclang-index-plugin.so \
 		-Xclang -add-plugin                 -Xclang mozsearch-index \
 		-Xclang -plugin-arg-mozsearch-index -Xclang testfiles/ \

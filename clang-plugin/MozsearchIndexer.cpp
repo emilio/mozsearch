@@ -147,6 +147,8 @@ public:
                       const MacroDefinition &Md) override;
 };
 
+extern "C" void __BREAK() {}
+
 class IndexConsumer : public ASTConsumer,
                       public RecursiveASTVisitor<IndexConsumer>,
                       public DiagnosticConsumer {
@@ -255,7 +257,14 @@ private:
     llvm::raw_string_ostream Stream(Backing);
     bool Qualified = true;
     D->getNameForDiagnostic(Stream, clang::PrintingPolicy(CI.getLangOpts()), Qualified);
-    return Stream.str();
+    std::string str = Stream.str();
+    if (str.find("nsTArray") != std::string::npos &&
+        str.find("AppendElements") != std::string::npos &&
+        str.find("ServoAttr") != std::string::npos) {
+      printf("\n\nGotcha\n\n");
+      __BREAK();
+    }
+    return str;
   }
 
   // Returns the qualified name of `d` without considering template parameters.
